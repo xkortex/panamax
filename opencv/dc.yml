@@ -9,5 +9,5 @@ services:
       dockerfile: opencv.docker
       args:
         OPENCV_VERSION: $OPENCV_VERSION
-    image: prefrontalvortex/panamax/py2-opencv:$OPENCV_VERSION
+    image: prefrontalvortex/py2-opencv:$OPENCV_VERSION
 ...
