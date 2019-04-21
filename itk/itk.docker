@@ -1,0 +1,19 @@
+FROM prefrontalvortex/ubuntu:xenial-py2sci
+
+ARG VERS_ITK=4.13.2
+ENV VERS_ITK=$VERS_ITK
+
+WORKDIR /root/
+
+ADD https://github.com/InsightSoftwareConsortium/ITK/archive/v${VERS_ITK}.tar.gz \
+    itk.tar.gz
+
+RUN tar xf itk.tar.gz &&\
+    mv ITK-${VERS_ITK} ITK &&\
+    rm itk.tar.gz &&\
+    mkdir ITK-build &&\
+    cd ITK-build &&\
+    cmake ../ITK && \
+    make -j $(nproc) 
+
+

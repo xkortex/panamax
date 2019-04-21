@@ -1,0 +1,17 @@
+# Py2 science basis build, for things like opencv
+
+FROM prefrontalvortex/ubuntu:xenial-buildees
+
+
+RUN apt-get install -qq --no-install-recommends \
+        gfortran \
+        python-dev \
+        libboost-all-dev \
+    && apt-get clean
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python2 get-pip.py
+
+RUN pip2 install \
+        numpy \
+        scipy

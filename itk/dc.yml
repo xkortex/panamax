@@ -1,0 +1,13 @@
+---
+
+version: '3.7'
+services:
+  itk:
+    build:
+      context: .
+      dockerfile: itk.docker
+      args:
+        VERS_ITK: $VERS_ITK
+    image: prefrontalvortex/itk:$VERS_ITK
+
+...

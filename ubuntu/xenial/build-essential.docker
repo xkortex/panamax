@@ -1,0 +1,14 @@
+# Ubuntu base for building things with gcc, cmake and the like
+
+FROM ubuntu:xenial
+
+RUN apt-get update -qq && apt-get install -qq \
+        curl \
+    && apt-get install -qq --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        pkg-config \
+        ssh \
+        unzip \
+    && apt-get clean

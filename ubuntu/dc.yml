@@ -1,0 +1,15 @@
+---
+
+version: '3.7'
+services:
+  xenial-buildees:
+    build:
+      context: xenial
+      dockerfile: build-essential.docker
+    image: prefrontalvortex/ubuntu:xenial-buildees
+  xenial-py2sci:
+    build:
+      context: xenial
+      dockerfile: py2sci.docker
+    image: prefrontalvortex/ubuntu:xenial-py2sci
+...
