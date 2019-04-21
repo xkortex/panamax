@@ -1,0 +1,22 @@
+# build tool junk
+build
+devel
+logs
+
+.cache
+*.pyc
+.python_history
+
+
+# junk from docker 
+*ash_history
+.local
+
+# ros output
+output
+
+# IDE
+**/.idea 
+**/.vscode
+**/cmake-build-debug
+**/.ipython

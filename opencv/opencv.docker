@@ -1,0 +1,68 @@
+FROM ubuntu:xenial as base-ubuntu
+
+## notes:
+## libtiff-dev installs libjpeg
+
+RUN apt-get update -qq && apt-get install -qq \
+        curl \
+    && apt-get install -qq --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        pkg-config \
+        ssh \
+        unzip \
+        gfortran \
+        libatlas-base-dev \
+        libboost-all-dev \
+        libgflags-dev \
+        libgoogle-glog-dev \
+        libhdf5-serial-dev \
+        libjasper-dev \
+        libleveldb-dev \
+        liblmdb-dev \
+        libprotobuf-dev \
+        libtiff5-dev=4.0.6* \
+        libpng12-dev=1.2.54* \
+        libsnappy-dev \
+        protobuf-compiler \
+    && apt-get clean
+
+RUN apt-get update -qq && apt-get install -y \
+        python-dev \
+    && apt-get clean
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python2 get-pip.py
+
+RUN pip2 install \
+        numpy==1.16 \
+        scipy==1.2
+
+ARG OPENCV_VERSION=3.3.1
+ENV OPENCV_VERSION=$OPENCV_VERSION
+
+RUN echo "OPENCV_VERSION: $OPENCV_VERSION"
+## =========================  opencv  =====================================
+FROM base-ubuntu as opencv
+
+# Get opencv source
+WORKDIR /root/opencv
+ADD "https://github.com/opencv/opencv/archive/$OPENCV_VERSION.tar.gz" .
+
+# Build opencv
+RUN tar xf "$OPENCV_VERSION.tar.gz" && \
+    rm "$OPENCV_VERSION.tar.gz"
+
+RUN mkdir -p "opencv-$OPENCV_VERSION/release" &&\
+    cd "opencv-$OPENCV_VERSION/release" &&\
+    cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D BUILD_PYTHON_SUPPORT=ON \
+    -D WITH_XINE=ON \
+    -D WITH_TBB=ON \
+    -D WITH_PNG=ON \
+    -D WITH_TIFF=ON \
+    -D WITH_CUDA=OFF \
+    .. \
+    && cmake --build . --target install -- -j"$(nproc)"

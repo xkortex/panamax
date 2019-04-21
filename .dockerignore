@@ -1,0 +1,29 @@
+# ignore docker stuff so tinkering with it doesn't invalidate cache
+*.docker
+dc-*.yml
+docker-compose.yml
+.drone.yml
+
+.cache
+.cmake
+.config
+.dbus
+.ipython
+.local
+.ros
+.git
+.idea
+build
+docs
+gtest
+
+
+*.pyc
+.python_history
+
+
+# IDE
+**/.idea
+**/.vscode
+**/cmake-build-debug
+**/.ipython

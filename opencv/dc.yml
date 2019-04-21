@@ -1,0 +1,13 @@
+---
+
+version: '3.7'
+services:
+  # our own container for opencv deps
+  opencv:
+    build:
+      context: .
+      dockerfile: opencv.docker
+      args:
+        OPENCV_VERSION: $OPENCV_VERSION
+    image: prefrontalvortex/panamax/py2-opencv:$OPENCV_VERSION
+...
