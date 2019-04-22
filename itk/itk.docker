@@ -14,6 +14,6 @@ RUN tar xf itk.tar.gz &&\
     mkdir ITK-build &&\
     cd ITK-build &&\
     cmake ../ITK && \
-    make -j $(nproc) 
+    make -j $(nproc)
 
 

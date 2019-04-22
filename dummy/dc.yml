@@ -1,0 +1,12 @@
+---
+
+version: '3.7'
+services:
+  # our own container for opencv deps
+  opencv:
+    build:
+      context: .
+      dockerfile: dummy.docker
+
+    image: prefrontalvortex/dummy
+...

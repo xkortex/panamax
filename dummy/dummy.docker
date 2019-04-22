@@ -1,0 +1,12 @@
+FROM ubuntu:bionic
+
+WORKDIR /root/
+
+RUN apt-get update -q && apt-get install -y \
+    git
+
+RUN git clone https://github.com/xkortex/panamax.git &&\
+    cd panamax &&\
+    printf "\n\n" &&\
+    git rev-parse --short HEAD &&\
+    printf "\n\n"
