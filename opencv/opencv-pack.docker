@@ -1,6 +1,9 @@
 FROM ubuntu:xenial as base-ubuntu
 
 ## notes:
+## Generate a package for installing. Uses static links to generate a file
+## which can be used to install OpenCV with zero dependencies
+## ./OpenCV-install.sh --exclude-subdir --skip-license
 ## libtiff-dev installs libjpeg
 
 RUN apt-get update -qq && apt-get install -qq \
@@ -28,9 +31,10 @@ RUN apt-get update -qq && apt-get install -qq \
         protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*
 
+
 RUN apt-get update -qq && apt-get install -y \
         python-dev \
-    && apt-get clean
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python2 get-pip.py
@@ -57,7 +61,7 @@ RUN tar xf "$OPENCV_VERSION.tar.gz" \
     && cd "opencv-$OPENCV_VERSION/release" \
     && cmake \
         -D CMAKE_BUILD_TYPE=RELEASE \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D CMAKE_INSTALL_PREFIX=/root/opencv \
         -D BUILD_PYTHON_SUPPORT=ON \
         -D WITH_XINE=ON \
         -D WITH_TBB=ON \
@@ -66,5 +70,7 @@ RUN tar xf "$OPENCV_VERSION.tar.gz" \
         -D WITH_CUDA=OFF \
         -D WITH_QT=OFF \
         -D WITH_GTK=OFF\
-        .. &&\
-    cmake --build . --target install -- -j"$(nproc)"
+        -D CPACK_BINARY_DEB:BOOL=ON \
+        -D BUILD_SHARED_LIBS=ON \
+        .. \
+    && cmake --build . --target package -- -j"$((`nproc`<2?1:$((`nproc`-1))))"

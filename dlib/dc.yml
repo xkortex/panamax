@@ -1,0 +1,13 @@
+---
+
+version: '3.7'
+services:
+  itk:
+    build:
+      context: .
+      dockerfile: dlib.docker
+      args:
+        VERS_DLIB: $VERS_DLIB
+    image: prefrontalvortex/itk:$VERS_DLIB
+
+...

@@ -1,0 +1,22 @@
+FROM prefrontalvortex/ubuntu:xenial-py2sci
+
+ARG VERS_ITK=4.13.2
+ENV VERS_ITK=$VERS_ITK
+
+WORKDIR /root/
+
+ADD https://github.com/InsightSoftwareConsortium/ITK/archive/v${VERS_ITK}.tar.gz \
+    itk.tar.gz
+
+RUN wget http://dlib.net/files/dlib-19.13.tar.bz2 && \
+    tar xf dlib-19.13.tar.bz2 && \
+    rm dlib-19.13.tar.bz2 &&\
+    cd dlib-19.13/ && \
+    mkdir build && \
+    cd build && \
+    cmake -j "$((`nproc`<2?1:$((`nproc`-1))))" .. && \
+    cmake --build . --config Release && \
+    make install && \
+    ldconfig
+
+
