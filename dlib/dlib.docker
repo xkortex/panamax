@@ -1,22 +1,32 @@
-FROM prefrontalvortex/ubuntu:xenial-py2sci
+FROM xkortex/ubuntu:xenial-py2sci
 
-ARG VERS_ITK=4.13.2
-ENV VERS_ITK=$VERS_ITK
+ARG VERS_DLIB=19.13
+ENV VERS_DLIB=$VERS_DLIB \
+    PROJ_VERS=$VERS_DLIB\
+    PROJ_NAME=dlib
 
 WORKDIR /root/
 
-ADD https://github.com/InsightSoftwareConsortium/ITK/archive/v${VERS_ITK}.tar.gz \
-    itk.tar.gz
 
-RUN wget http://dlib.net/files/dlib-19.13.tar.bz2 && \
-    tar xf dlib-19.13.tar.bz2 && \
-    rm dlib-19.13.tar.bz2 &&\
-    cd dlib-19.13/ && \
-    mkdir build && \
-    cd build && \
-    cmake -j "$((`nproc`<2?1:$((`nproc`-1))))" .. && \
-    cmake --build . --config Release && \
-    make install && \
-    ldconfig
+RUN curl -L http://dlib.net/files/dlib-${VERS_DLIB}.tar.bz2 \
+        -o dlib.tar.bz2 &&\
+    tar xf dlib.tar.bz2 && \
+    rm dlib.tar.bz2 &&\
+    mv dlib-${VERS_DLIB} ${PROJ_NAME}
+
+
+RUN mkdir -p /build/${PROJ_NAME} &&\
+    mkdir -p /dest/${PROJ_NAME} &&\
+    cmake \
+        -B/build/${PROJ_NAME}\
+        -S/root/${PROJ_NAME}\
+        -DCMAKE_INSTALL_PREFIX=/dest/${PROJ_NAME} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -G Ninja \
+        | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
+
+RUN cd /build/${PROJ_NAME} &&\
+    ninja &&\
+    ninja install | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_manifest.txt
 
 

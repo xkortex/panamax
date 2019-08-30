@@ -55,10 +55,11 @@ WORKDIR /root/opencv-source
 ADD "https://github.com/opencv/opencv/archive/$OPENCV_VERSION.tar.gz" .
 
 # Build opencv
-RUN tar xf "$OPENCV_VERSION.tar.gz" \
-    && rm "$OPENCV_VERSION.tar.gz" \
-    && mkdir -p "opencv-$OPENCV_VERSION/release" \
-    && cd "opencv-$OPENCV_VERSION/release" \
+RUN tar xf ${OPENCV_VERSION}.tar.gz \
+    && rm ${OPENCV_VERSION}.tar.gz\
+    && mv opencv-${OPENCV_VERSION} opencv \
+    && mkdir -p opencv/build \
+    && cd opencv/build \
     && cmake \
         -D CMAKE_BUILD_TYPE=RELEASE \
         -D CMAKE_INSTALL_PREFIX=/root/opencv \
@@ -73,4 +74,7 @@ RUN tar xf "$OPENCV_VERSION.tar.gz" \
         -D CPACK_BINARY_DEB:BOOL=ON \
         -D BUILD_SHARED_LIBS=ON \
         .. \
-    && cmake --build . --target package -- -j"$((`nproc`<2?1:$((`nproc`-1))))"
+    && cmake --build . -- -j"$((`nproc`<2?1:$((`nproc`-1))))"
+
+RUN cd opencv/build &&\
+    cmake --build . --target package -- -j"$((`nproc`<2?1:$((`nproc`-1))))"

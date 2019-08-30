@@ -1,19 +1,29 @@
-FROM prefrontalvortex/ubuntu:xenial-py2sci
+FROM xkortex/ubuntu:xenial-buildees
 
-ARG VERS_ITK=4.13.2
-ENV VERS_ITK=$VERS_ITK
+ARG VERS_ITK=5.0.1
+ENV VERS_ITK=$VERS_ITK\
+    PROJ_VERS=$VERS_ITK\
+    PROJ_NAME=itk
 
 WORKDIR /root/
 
-ADD https://github.com/InsightSoftwareConsortium/ITK/archive/v${VERS_ITK}.tar.gz \
-    itk.tar.gz
-
-RUN tar xf itk.tar.gz &&\
-    mv ITK-${VERS_ITK} ITK &&\
+RUN curl -L https://github.com/InsightSoftwareConsortium/ITK/archive/v${VERS_ITK}.tar.gz \
+        -o itk.tar.gz &&\
+    tar xf itk.tar.gz &&\
     rm itk.tar.gz &&\
-    mkdir ITK-build &&\
-    cd ITK-build &&\
-    cmake ../ITK && \
-    make -j $(nproc)
+    mv ITK-${VERS_ITK} ${PROJ_NAME}
 
+RUN mkdir -p /build/${PROJ_NAME} &&\
+    mkdir -p /dest/${PROJ_NAME} &&\
+    cmake \
+        -B/build/${PROJ_NAME}\
+        -S/root/${PROJ_NAME}\
+        -DCMAKE_INSTALL_PREFIX=/dest/${PROJ_NAME} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -G Ninja \
+        | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
+
+RUN cd /build/${PROJ_NAME} &&\
+    ninja &&\
+    ninja install | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_manifest.txt
 

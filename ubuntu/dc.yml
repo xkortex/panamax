@@ -6,10 +6,10 @@ services:
     build:
       context: xenial
       dockerfile: build-essential.docker
-    image: prefrontalvortex/ubuntu:xenial-buildees
+    image: xkortex/ubuntu:xenial-buildees
   xenial-py2sci:
     build:
       context: xenial
       dockerfile: py2sci.docker
-    image: prefrontalvortex/ubuntu:xenial-py2sci
+    image: xkortex/ubuntu:xenial-py2sci
 ...

@@ -8,6 +8,6 @@ services:
       dockerfile: dlib.docker
       args:
         VERS_DLIB: $VERS_DLIB
-    image: prefrontalvortex/itk:$VERS_DLIB
+    image: xkortex/dlib:$VERS_DLIB
 
 ...

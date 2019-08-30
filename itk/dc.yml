@@ -8,6 +8,6 @@ services:
       dockerfile: itk.docker
       args:
         VERS_ITK: $VERS_ITK
-    image: prefrontalvortex/itk:$VERS_ITK
+    image: xkortex/itk:$VERS_ITK
 
 ...
