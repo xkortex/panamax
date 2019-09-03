@@ -1,0 +1,50 @@
+---
+kind: pipeline
+name: "Build and push images"
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: "Build, tag, and push base images"
+    image: kitware/dind
+    commands:
+      - "export BRANCH=$(echo ${\
+         DRONE_SOURCE_BRANCH} | tr / - | sed 's/master/latest/g')"
+      - "echo \"Building and tagging branch: $BRANCH\""
+      - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
+          ${IMAGE_REGISTRY}"
+      - "docker-compose -f ubuntu/dc.yml build "
+      - "echo \"Pushing images for $BRANCH\""
+      - "docker-compose -f ubuntu/dc.yml push"
+    environment:
+      GITLAB_PASSWORD:
+        from_secret: kwcvbot_password
+      IMAGE_REGISTRY:
+        from_secret: gitlab_registry
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+      - name: ssh
+        path: /root/.ssh
+  # =======================================================================
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+  - name: ssh
+    host:
+      path: /home/kwcvrobot/.ssh
+
+trigger:
+  branch:
+  - stage
+  - latest
+  - master
+  event:
+  - push
+  - pull_request
+  - tag
+
