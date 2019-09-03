@@ -7,7 +7,7 @@ platform:
   arch: amd64
 
 steps:
-  - name: "Build, tag, and push base images"
+  - name: "Build, tag, and push xenial base images"
     image: kitware/dind
     commands:
       - "export BRANCH=$(echo ${\
@@ -23,6 +23,30 @@ steps:
         from_secret: kwcvbot_password
       IMAGE_REGISTRY:
         from_secret: gitlab_registry
+      OS_VERS: xenial
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+      - name: ssh
+        path: /root/.ssh
+  # =======================================================================
+  - name: "Build, tag, and push bionic base images"
+    image: kitware/dind
+    commands:
+      - "export BRANCH=$(echo ${\
+         DRONE_SOURCE_BRANCH} | tr / - | sed 's/master/latest/g')"
+      - "echo \"Building and tagging branch: $BRANCH\""
+      - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
+          ${IMAGE_REGISTRY}"
+      - "docker-compose -f ubuntu/dc.yml build "
+      - "echo \"Pushing images for $BRANCH\""
+      - "docker-compose -f ubuntu/dc.yml push"
+    environment:
+      GITLAB_PASSWORD:
+        from_secret: kwcvbot_password
+      IMAGE_REGISTRY:
+        from_secret: gitlab_registry
+      OS_VERS: bionic
     volumes:
       - name: docker
         path: /var/run/docker.sock
