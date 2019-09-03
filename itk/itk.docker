@@ -1,4 +1,7 @@
-FROM xkortex/ubuntu:xenial-buildees
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+ARG SUBTAG=cvfull
+FROM xkortex/${OS_BASE}:${OS_VERS}-${SUBTAG} as base
 
 ARG VERS_ITK=5.0.1
 ENV VERS_ITK=$VERS_ITK\
@@ -23,7 +26,20 @@ RUN mkdir -p /build/${PROJ_NAME} &&\
         -G Ninja \
         | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
 
+# todo: switch entirely to package format, no need for destdir
 RUN cd /build/${PROJ_NAME} &&\
     ninja &&\
     ninja install | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_manifest.txt
 
+# todo: see if we can strip version number from package, probably cpack -P
+RUN cd /build/${PROJ_NAME} &&\
+    cpack -G TGZ -C Release &&\
+    cpack -G DEB -C Release &&\
+    mkdir -p /release &&\
+    mv ITK-${PROJ_VERS}-Linux.tar.gz /release/\
+    mv ITK-${PROJ_VERS}-Linux.deb /release/
+
+## =========================  package artifacts =====================================
+FROM alpine as final
+
+COPY --from=base /release /release

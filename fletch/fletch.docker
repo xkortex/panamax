@@ -1,0 +1,90 @@
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM xkortex/${OS_BASE}:${OS_VERS}-cvfull as base
+
+ARG VERS_FLETCH=1.3.0
+ENV VERS_FLETCH=$VERS_FLETCH\
+    PROJ_VERS=$VERS_FLETCH\
+    PROJ_NAME=fletch
+
+WORKDIR /root/
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+        build-essential \
+        libgl1-mesa-dev \
+        libexpat1-dev \
+        libgtk2.0-dev \
+        libxt-dev \
+        libxml2-dev \
+        libssl-dev \
+        liblapack-dev \
+        openssl \
+        curl \
+        wget \
+        git \
+        libreadline-dev \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG PY_MAJOR_VERSION=2
+ARG ENABLE_CUDA=OFF
+
+# conditional python package installation based on version
+RUN if [ "$PY_MAJOR_VERSION" = "2" ]; then \
+      apt-get install --no-install-recommends -y python2.7-dev \
+                                                 python2.7-setuptools \
+                                                 python-pip && \
+      pip install numpy==1.16; \
+    else \
+      apt-get install --no-install-recommends -y python3 \
+                                                 python3-dev \
+                                                 python3-pip && \
+      pip3 install numpy && \
+      ln -s /usr/bin/python3 /usr/local/bin/python; \
+    fi
+
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+#
+# Build Fletch
+#
+ENV LD_LIBRARY_PATH=/opt/kitware/fletch/lib/:$LD_LIBRARY_PAT
+
+RUN curl -L https://github.com/Kitware/fletch/archive/v${VERS_FLETCH}.tar.gz \
+        -o fletch.tar.gz &&\
+    tar xf fletch.tar.gz &&\
+    rm fletch.tar.gz &&\
+    mv fletch-${VERS_ITK} ${PROJ_NAME}
+
+RUN mkdir -p /build/${PROJ_NAME} /opt/kitware/${PROJ_NAME} &&\
+    mkdir -p /dest/${PROJ_NAME} &&\
+    cmake \
+        -B/build/${PROJ_NAME}\
+        -S/root/${PROJ_NAME}\
+        -DCMAKE_INSTALL_PREFIX=/dest/${PROJ_NAME} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -Dfletch_ENABLE_ALL_PACKAGES=ON \
+        -Dfletch_BUILD_WITH_PYTHON=ON \
+        -Dfletch_BUILD_WITH_CUDA=${ENABLE_CUDA} \
+        -Dfletch_PYTHON_MAJOR_VERSION=${PY_MAJOR_VERSION} \
+        -Dfletch_BUILD_INSTALL_PREFIX=/opt/kitware/fletch \
+        -G Ninja \
+        | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
+
+# todo: switch entirely to package format, no need for destdir
+RUN cd /build/${PROJ_NAME} &&\
+    ninja &&\
+    ninja install | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_manifest.txt
+
+# todo: see if we can strip version number from package, probably cpack -P
+RUN cd /build/${PROJ_NAME} &&\
+    cpack -G TGZ -C Release &&\
+    mkdir -p /release &&\
+    mv ITK-${PROJ_VERS}-Linux.tar.gz /release/
+
+## =========================  package artifacts =====================================
+FROM alpine as final
+
+COPY --from=base /release /release

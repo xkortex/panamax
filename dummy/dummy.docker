@@ -1,6 +1,14 @@
-FROM ubuntu:bionic
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM ubuntu:${OS_VERS}
+
+ENV OS_VERS=$OS_VERS
 
 WORKDIR /root/
+
+ARG OS_VERS=xenial
+
+RUN echo $OS_VERS
 
 RUN apt-get update -q && apt-get install -y \
     git

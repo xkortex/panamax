@@ -1,0 +1,15 @@
+# Py2/Py3 science basis build, for things like opencv
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM xkortex/${OS_BASE}:${OS_VERS}-pysci as base
+
+RUN apt-get update -qq && apt-get install -y -q --no-install-recommends \
+        libatlas-base-dev \
+        libboost-all-dev \
+        libgl1-mesa-dev \
+        libavcodec-dev libavformat-dev libswscale-dev \
+        libtiff-dev libpng-dev\
+        libtbb2 libtbb-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+

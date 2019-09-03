@@ -1,4 +1,6 @@
-FROM ubuntu:xenial as base-ubuntu
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM xkortex/${OS_BASE}:${OS_VERS}-pysci as base
 
 ## notes:
 ## libtiff-dev installs libjpeg
@@ -28,23 +30,14 @@ RUN apt-get update -qq && apt-get install -qq \
         protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update -qq && apt-get install -y \
-        python-dev \
-    && apt-get clean
 
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-    && python2 get-pip.py
 
-RUN pip2 install \
-        numpy==1.16 \
-        scipy==1.2
+## =========================  opencv  =====================================
+FROM base as opencv
 
 ARG OPENCV_VERSION=3.3.1
 ENV OPENCV_VERSION=$OPENCV_VERSION \
     OPENCV_INSTALL_DIR=/root/opencv
-
-## =========================  opencv  =====================================
-FROM base-ubuntu as opencv
 
 # Get opencv source
 WORKDIR /root/opencv-source

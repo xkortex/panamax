@@ -1,0 +1,20 @@
+# Dependency heavy base image for accelerated building of CV containers
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM xkortex/${OS_BASE}:${OS_VERS}-buildees as base
+
+## Dependency notes:
+## gfortran and Atlas is needed for optimized numpy
+RUN apt-get update -qq && apt-get install -y -q --no-install-recommends \
+        gfortran \
+        libatlas-base-dev \
+        python-dev \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o /root/get-pip.py \
+    && python3 /root/get-pip.py \
+    && python2 /root/get-pip.py
+
+RUN pip2 install --upgrade pip numpy &&\
+    pip3 install --upgrade pip numpy

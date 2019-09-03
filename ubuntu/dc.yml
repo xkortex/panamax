@@ -2,14 +2,29 @@
 
 version: '3.7'
 services:
-  xenial-buildees:
+  ## Essential packages for building
+  buildees:
     build:
-      context: xenial
-      dockerfile: build-essential.docker
-    image: xkortex/ubuntu:xenial-buildees
-  xenial-py2sci:
+      context: .
+      dockerfile: general/build-essential.docker
+      args:
+        OS_BASE: ${OS_BASE}
+        OS_VERS: ${OS_VERS}
+    image: "xkortex/${OS_BASE}:${OS_VERS}-buildees"
+  pysci:
     build:
-      context: xenial
-      dockerfile: py2sci.docker
-    image: xkortex/ubuntu:xenial-py2sci
+      context: .
+      dockerfile: general/pysci.docker
+      args:
+        OS_BASE: ${OS_BASE}
+        OS_VERS: ${OS_VERS}
+    image: "xkortex/${OS_BASE}:${OS_VERS}-pysci"
+  cvfull:
+    build:
+      context: .
+      dockerfile: general/cvfull.docker
+      args:
+        OS_BASE: ${OS_BASE}
+        OS_VERS: ${OS_VERS}
+    image: "xkortex/${OS_BASE}:${OS_VERS}-cvfull"
 ...

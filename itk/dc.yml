@@ -8,6 +8,7 @@ services:
       dockerfile: itk.docker
       args:
         VERS_ITK: $VERS_ITK
+        SUBTAG: cvfull
     image: xkortex/itk:$VERS_ITK
 
 ...

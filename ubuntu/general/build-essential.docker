@@ -1,0 +1,27 @@
+# Ubuntu base for building things with gcc, cmake and the like
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM ${OS_BASE}:${OS_VERS} as base
+
+RUN apt-get update -qq && apt-get install -qq \
+        curl \
+        apt-transport-https \
+        ca-certificates \
+        software-properties-common \
+    && apt-get install -qq --no-install-recommends \
+        build-essential \
+        git \
+        pkg-config \
+        ssh \
+        unzip \
+        ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+
+## Install latest version of Cmake
+RUN curl https://apt.kitware.com/keys/kitware-archive-latest.asc -L 2>/dev/null | apt-key add - \
+    && apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" \
+    && apt-get update -y \
+    && apt-get install -y \
+        cmake \
+    && rm -rf /var/lib/apt/lists/*

@@ -1,0 +1,14 @@
+---
+
+version: '3.7'
+services:
+  itk:
+    build:
+      context: .
+      dockerfile: fletch.docker
+      args:
+        OS_BASE: $OS_BASE
+        OS_VERS: $OS_VERS
+    image: "xkortex/fletch-${OS_BASE}-${OS_VERS}:latest"
+
+...

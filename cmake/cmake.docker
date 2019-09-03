@@ -1,0 +1,52 @@
+# Ubuntu base for building things with gcc, cmake and the like
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM ${OS_BASE}:${OS_VERS} as base
+
+RUN apt-get update -qq && apt-get install -qq \
+        curl \
+        apt-transport-https \
+        ca-certificates \
+        software-properties-common \
+    && apt-get install -qq --no-install-recommends \
+        build-essential \
+        git \
+        pkg-config \
+        ssh \
+        unzip \
+        ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+#
+ARG VERS_CMAKE=3.15.2
+ENV VERS_CMAKE=$VERS_CMAKE \
+    PROJ_VERS=$VERS_CMAKE\
+    PROJ_NAME=cmake
+
+WORKDIR /root/
+
+
+RUN curl -L https://github.com/Kitware/CMake/releases/download/v${VERS_CMAKE}/cmake-${VERS_CMAKE}.tar.gz \
+        -o ${PROJ_NAME}.tar.gz &&\
+    tar xf ${PROJ_NAME}.tar.gz && \
+    rm ${PROJ_NAME}.tar.gz &&\
+    mv ${PROJ_NAME}-${VERS_CMAKE} ${PROJ_NAME}
+
+RUN cd /root/cmake &&\
+    ./bootstrap &&\
+    make &&\
+    make install
+
+RUN mkdir -p /build/${PROJ_NAME} &&\
+    mkdir -p /dest/${PROJ_NAME} &&\
+    cmake \
+        -B/build/${PROJ_NAME}\
+        -S/root/${PROJ_NAME}\
+        -DCMAKE_INSTALL_PREFIX=/dest/${PROJ_NAME} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -G Ninja \
+        | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
+
+RUN cd /build/${PROJ_NAME} &&\
+    ninja &&\
+    ninja install | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_manifest.txt
