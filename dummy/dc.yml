@@ -3,7 +3,7 @@
 version: '3.7'
 services:
   # our own container for opencv deps
-  opencv:
+  dummy:
     build:
       context: .
       dockerfile: dummy.docker

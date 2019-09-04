@@ -12,7 +12,7 @@ services:
         OS_VERS: ${OS_VERS}
         VERS_ITK: ${VERS_ITK}
         SUBTAG: cvfull
-    image: "${IMAGE_REGISTRY}/itk:$VERS_ITK"
+    image: "${IMAGE_REGISTRY}/itk-${OS_VERS}:$VERS_ITK"
   itk-latest:
     build:
       context: .
@@ -23,6 +23,13 @@ services:
         OS_VERS: ${OS_VERS}
         VERS_ITK: latest
         SUBTAG: cvfull
-    image: "${IMAGE_REGISTRY}/itk:latest"
+    volumes:
+      - "workspace:/ws"
+    image: "${IMAGE_REGISTRY}/itk-${OS_VERS}:latest"
+
+volumes:
+  workspace:
+    labels:
+      com.kitware.description: "Persistence for interactive development"
 
 ...

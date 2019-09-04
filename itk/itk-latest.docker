@@ -4,9 +4,12 @@ ARG OS_VERS=xenial
 ARG SUBTAG=cvfull
 FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-${SUBTAG} as base
 
-ENV VERS_ITK=master\
+ARG VERS_ITK=master
+ENV VERS_ITK=$VERS_ITK\
     PROJ_VERS=$VERS_ITK\
-    PROJ_NAME=itk
+    PROJ_NAME=itk \
+    SRC_BASE=/root \
+    PY_MAJOR_VERSION=2
 
 WORKDIR /root/
 
@@ -18,9 +21,10 @@ RUN mkdir -p /build/${PROJ_NAME} &&\
     mkdir -p /dest/${PROJ_NAME} &&\
     cmake \
         -B/build/${PROJ_NAME}\
-        -S/root/${PROJ_NAME}\
+        -S${SRC_BASE}/${PROJ_NAME}\
         -DCMAKE_INSTALL_PREFIX=/dest/${PROJ_NAME} \
         -DCMAKE_BUILD_TYPE=Release \
+        -DPYTHON_EXECUTABLE=/usr/bin/python${PY_MAJOR_VERSION} \
         -G Ninja \
         | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
 
@@ -29,13 +33,12 @@ RUN cd /build/${PROJ_NAME} &&\
     ninja &&\
     ninja install | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_manifest.txt
 
-# todo: see if we can strip version number from package, probably cpack -P
 RUN cd /build/${PROJ_NAME} &&\
     cpack -G TGZ -C Release &&\
-    cpack -G DEB -C Release &&\
+    cpack -G DEB -C Release  &&\
     mkdir -p /release &&\
-    mv ITK-${PROJ_VERS}-Linux.tar.gz /release/ &&\
-    mv ITK-${PROJ_VERS}-Linux.deb /release/
+    mv ITK-*.tar.gz /release/ &&\
+    mv ITK-*.deb /release/
 
 ## =========================  package artifacts =====================================
 FROM alpine as final

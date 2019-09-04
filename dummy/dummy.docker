@@ -18,3 +18,14 @@ RUN git clone https://github.com/xkortex/panamax.git &&\
     printf "\n\n" &&\
     git rev-parse --short HEAD &&\
     printf "\n\n"
+
+ADD "https://www.random.org/strings/?num=1&len=20&digits=on&unique=on&format=plain&rnd=new" /nonce.txt
+
+RUN echo "this gonna fail" &&\
+    echo "I want this " > /want.txt &&\
+    cat /want.txt &&\
+    cat /nonce.txt &&\
+    foobarspamfail
+
+
+RUN echo "I really want this step to work"
