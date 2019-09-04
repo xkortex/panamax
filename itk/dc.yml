@@ -7,8 +7,22 @@ services:
       context: .
       dockerfile: itk.docker
       args:
-        VERS_ITK: $VERS_ITK
+        IMAGE_REGISTRY: ${IMAGE_REGISTRY}
+        OS_BASE: ${OS_BASE}
+        OS_VERS: ${OS_VERS}
+        VERS_ITK: ${VERS_ITK}
         SUBTAG: cvfull
-    image: xkortex/itk:$VERS_ITK
+    image: "${IMAGE_REGISTRY}/itk:$VERS_ITK"
+  itk-latest:
+    build:
+      context: .
+      dockerfile: itk-latest.docker
+      args:
+        IMAGE_REGISTRY: ${IMAGE_REGISTRY}
+        OS_BASE: ${OS_BASE}
+        OS_VERS: ${OS_VERS}
+        VERS_ITK: latest
+        SUBTAG: cvfull
+    image: "${IMAGE_REGISTRY}/itk:latest"
 
 ...

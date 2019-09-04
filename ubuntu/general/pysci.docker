@@ -1,7 +1,8 @@
 # Dependency heavy base image for accelerated building of CV containers
+ARG IMAGE_REGISTRY=xkortex
 ARG OS_BASE=ubuntu
 ARG OS_VERS=xenial
-FROM xkortex/${OS_BASE}:${OS_VERS}-buildees as base
+FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-buildees as base
 
 ## Dependency notes:
 ## gfortran and Atlas is needed for optimized numpy

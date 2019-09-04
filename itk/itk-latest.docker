@@ -4,18 +4,15 @@ ARG OS_VERS=xenial
 ARG SUBTAG=cvfull
 FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-${SUBTAG} as base
 
-ARG VERS_ITK=5.0.1
-ENV VERS_ITK=$VERS_ITK\
+ENV VERS_ITK=master\
     PROJ_VERS=$VERS_ITK\
     PROJ_NAME=itk
 
 WORKDIR /root/
 
-RUN curl -L https://github.com/InsightSoftwareConsortium/ITK/archive/v${VERS_ITK}.tar.gz \
-        -o itk.tar.gz &&\
-    tar xf itk.tar.gz &&\
-    rm itk.tar.gz &&\
-    mv ITK-${VERS_ITK} ${PROJ_NAME}
+RUN git clone --depth 1 https://github.com/InsightSoftwareConsortium/ITK.git itk &&\
+    export PROJ_VERS=$(git describe --tags --dirty)
+
 
 RUN mkdir -p /build/${PROJ_NAME} &&\
     mkdir -p /dest/${PROJ_NAME} &&\

@@ -54,7 +54,7 @@ steps:
         path: /root/.ssh
   # =======================================================================
 
-  - name: "BTP ITK"
+  - name: "BTP ITK release"
     image: kitware/dind
     commands:
       - "export BRANCH=$(echo ${\
@@ -62,9 +62,33 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "docker-compose -f itk/dc.yml build "
+      - "docker-compose -f itk/dc.yml build itk"
       - "echo \"Pushing images for $BRANCH\""
-      - "docker-compose -f itk/dc.yml push"
+      - "docker-compose -f itk/dc.yml push itk"
+    environment:
+      GITLAB_PASSWORD:
+        from_secret: kwcvbot_password
+      IMAGE_REGISTRY:
+        from_secret: gitlab_registry
+      OS_VERS: xenial
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+      - name: ssh
+        path: /root/.ssh
+  # =======================================================================
+
+  - name: "BTP ITK latest"
+    image: kitware/dind
+    commands:
+      - "export BRANCH=$(echo ${\
+         DRONE_SOURCE_BRANCH} | tr / - | sed 's/master/latest/g')"
+      - "echo \"Building and tagging branch: $BRANCH\""
+      - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
+          ${IMAGE_REGISTRY}"
+      - "docker-compose -f itk/dc.yml build itk-latest"
+      - "echo \"Pushing images for $BRANCH\""
+      - "docker-compose -f itk/dc.yml push itk-latest"
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password

@@ -8,6 +8,10 @@ services:
       context: .
       dockerfile: opencv.docker
       args:
+        IMAGE_REGISTRY: ${IMAGE_REGISTRY}
+        OS_BASE: ${OS_BASE}
+        OS_VERS: ${OS_VERS}
+        SUBTAG: cvfull
         OPENCV_VERSION: $OPENCV_VERSION
-    image: prefrontalvortex/py2-opencv:$OPENCV_VERSION
+    image: "${IMAGE_REGISTRY}/py2-opencv:$OPENCV_VERSION"
 ...

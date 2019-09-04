@@ -1,6 +1,8 @@
+ARG IMAGE_REGISTRY=xkortex
 ARG OS_BASE=ubuntu
 ARG OS_VERS=xenial
-FROM xkortex/${OS_BASE}:${OS_VERS}-pysci as base
+ARG SUBTAG=cvfull
+FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-${SUBTAG} as base
 
 ## notes:
 ## libtiff-dev installs libjpeg
