@@ -38,16 +38,20 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "IMAGE_REGISTRY=nvidia/cuda docker-compose -f ubuntu/dc.yml build buildees"
-      - "docker tag nvidia/${OS_BASE}:${OS_VERS}-buildees \
-          ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-buildees"
+      - "IMAGE_REGISTRY=nvidia/cuda \
+          docker-compose -f ubuntu/dc.yml build ${TARGETS}"
+      - "for TAG in `echo ${TARGETS}`; do \
+          docker tag nvidia/${OS_BASE}:${OS_VERS}-buildees \
+            ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-buildees; \
+          done"
       - "echo \"Pushing images for $BRANCH\""
-      - "docker-compose -f ubuntu/dc.yml push"
+      - "docker-compose -f ubuntu/dc.yml push ${TARGETS}"
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password
       IMAGE_REGISTRY:
         from_secret: gitlab_registry
+      TARGETS: "buildees"
       OS_BASE: cuda
       OS_VERS: 9.1-cudnn7-devel-ubuntu16.04
     volumes:
