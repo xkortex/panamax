@@ -15,9 +15,9 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "docker pull ubuntu:${OS_VERS}"
-      - "docker tag  ubuntu:${OS_VERS} ${IMAGE_REGISTRY}:${OS_VERS}"
-      - "docker push ${IMAGE_REGISTRY}:${OS_VERS}"
+      - "docker pull ${OS_BASE}:${OS_VERS}"
+      - "docker tag  ${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/:${OS_VERS}"
+      - "docker push ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build "
       - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f ubuntu/dc.yml push"
@@ -26,6 +26,7 @@ steps:
         from_secret: kwcvbot_password
       IMAGE_REGISTRY:
         from_secret: gitlab_registry
+      OS_BASE: ubuntu
       OS_VERS: xenial
     volumes:
       - name: docker
