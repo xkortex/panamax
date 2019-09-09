@@ -16,7 +16,7 @@ steps:
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
       - "docker pull ${OS_BASE}:${OS_VERS}"
-      - "docker tag  ${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/:${OS_VERS}"
+      - "docker tag  ${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker push ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build "
       - "echo \"Pushing images for $BRANCH\""
