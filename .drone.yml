@@ -15,8 +15,8 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "docker pull ubuntu:${OS_VERSION}"
-      - "docker tag  ubuntu:${OS_VERSION} ${IMAGE_REGISTRY}:${OS_VERSION}"
+      - "docker pull ubuntu:${OS_VERS}"
+      - "docker tag  ubuntu:${OS_VERS} ${IMAGE_REGISTRY}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build "
       - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f ubuntu/dc.yml push"
@@ -40,8 +40,8 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "docker pull nvidia/cuda:${OS_VERSION}"
-      - "docker tag  nvidia/cuda:${OS_VERSION} ${IMAGE_REGISTRY}/cuda:${OS_VERSION}"
+      - "docker pull nvidia/${OS_BASE}:${OS_VERS}"
+      - "docker tag  nvidia/${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build ${TARGETS}"
       - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f ubuntu/dc.yml push ${TARGETS}"
