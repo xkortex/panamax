@@ -30,6 +30,32 @@ steps:
       - name: ssh
         path: /root/.ssh
   # =======================================================================
+  - name: "BTP CUDA base images"
+    image: kitware/dind
+    commands:
+      - "export BRANCH=$(echo ${\
+         DRONE_SOURCE_BRANCH} | tr / - | sed 's/master/latest/g')"
+      - "echo \"Building and tagging branch: $BRANCH\""
+      - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
+          ${IMAGE_REGISTRY}"
+      - "IMAGE_REGISTRY=nvidia/cuda docker-compose -f ubuntu/dc.yml build buildees"
+      - "docker tag nvidia/${OS_BASE}:${OS_VERS}-buildees \
+          ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-buildees"
+      - "echo \"Pushing images for $BRANCH\""
+      - "docker-compose -f ubuntu/dc.yml push"
+    environment:
+      GITLAB_PASSWORD:
+        from_secret: kwcvbot_password
+      IMAGE_REGISTRY:
+        from_secret: gitlab_registry
+      OS_BASE: cuda
+      OS_VERS: 9.1-cudnn7-devel-ubuntu16.04
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+      - name: ssh
+        path: /root/.ssh
+  # =======================================================================
   - name: "Build, tag, and push bionic base images"
     image: kitware/dind
     commands:
@@ -78,7 +104,7 @@ steps:
         path: /root/.ssh
   # =======================================================================
 
-  - name: "BTP ITK latest"
+  - name: "BTP girder_worker_cuda"
     image: kitware/dind
     commands:
       - "export BRANCH=$(echo ${\
@@ -86,9 +112,10 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "docker-compose -f itk/dc.yml build itk-latest"
+      - "OS_BASE=cuda \
+          OS_VERS=9.1-cudnn7-devel-ubuntu16.04  doc -f girder/dc.yml build"
       - "echo \"Pushing images for $BRANCH\""
-      - "docker-compose -f itk/dc.yml push itk-latest"
+      - "docker-compose -f itk/dc.yml push itk"
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password
@@ -101,7 +128,6 @@ steps:
       - name: ssh
         path: /root/.ssh
   # =======================================================================
-
 volumes:
   - name: docker
     host:

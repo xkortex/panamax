@@ -1,9 +1,10 @@
 # Ubuntu base for building things with gcc, cmake and the like
+ARG IMAGE_REGISTRY=xkortex
 ARG OS_BASE=ubuntu
 ARG OS_VERS=xenial
-FROM ${OS_BASE}:${OS_VERS} as base
+FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS} as base
 
-RUN apt-get update -qq && apt-get install -qq \
+RUN apt-get update -qq && apt-get install -yq \
         curl \
         apt-transport-https \
         ca-certificates \

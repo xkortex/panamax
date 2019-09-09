@@ -7,9 +7,12 @@ services:
     build:
       context: .
       dockerfile: dummy.docker
+#      network: host
       args:
         OS_BASE: ${OS_BASE}
         OS_VERS: ${OS_VERS}
+        http_proxy: "http://athena:3142/"
+
 
     image: xkortex/dummy
 ...

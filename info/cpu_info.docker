@@ -1,0 +1,12 @@
+ARG IMAGE_REGISTRY=xkortex
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+ARG SUBTAG=buildees
+FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-${SUBTAG} as base
+
+
+WORKDIR /root
+
+RUN git clone --depth 1 https://github.com/libigl/eigen.git /root/eigen &&\
+    mkdir -p /build/eigen &&\
+    cmake -B /build/eigen -S /root/eigen

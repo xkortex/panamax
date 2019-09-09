@@ -2,7 +2,7 @@
 ARG IMAGE_REGISTRY=xkortex
 ARG OS_BASE=ubuntu
 ARG OS_VERS=xenial
-FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-buildees as base
+FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}-pysci as base
 
 RUN apt-get update -qq && apt-get install -y -q --no-install-recommends \
         libatlas-base-dev \
