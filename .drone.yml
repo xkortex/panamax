@@ -19,7 +19,6 @@ steps:
       - "docker tag  ${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker push ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build "
-      - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f ubuntu/dc.yml push"
     environment:
       GITLAB_PASSWORD:
@@ -46,7 +45,6 @@ steps:
       - "docker tag  nvidia/${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker push ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build ${TARGETS}"
-      - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f ubuntu/dc.yml push ${TARGETS}"
     environment:
       GITLAB_PASSWORD:
@@ -70,14 +68,17 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
+      - "docker pull ${OS_BASE}:${OS_VERS}"
+      - "docker tag  ${OS_BASE}:${OS_VERS} ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
+      - "docker push ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS}"
       - "docker-compose -f ubuntu/dc.yml build "
-      - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f ubuntu/dc.yml push"
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password
       IMAGE_REGISTRY:
         from_secret: gitlab_registry
+      OS_BASE: ubuntu
       OS_VERS: bionic
     volumes:
       - name: docker
@@ -95,13 +96,13 @@ steps:
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
       - "docker-compose -f itk/dc.yml build itk"
-      - "echo \"Pushing images for $BRANCH\""
       - "docker-compose -f itk/dc.yml push itk"
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password
       IMAGE_REGISTRY:
         from_secret: gitlab_registry
+      OS_BASE: ubuntu
       OS_VERS: xenial
     volumes:
       - name: docker
@@ -118,16 +119,15 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "OS_BASE=cuda \
-          OS_VERS=9.1-cudnn7-devel-ubuntu16.04  doc -f girder/dc.yml build"
-      - "echo \"Pushing images for $BRANCH\""
-      - "docker-compose -f itk/dc.yml push itk"
+      - "doc -f girder/dc.yml build"
+      - "doc -f girder/dc.yml push "
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password
       IMAGE_REGISTRY:
         from_secret: gitlab_registry
-      OS_VERS: xenial
+      OS_BASE: cuda
+      OS_VERS: 9.1-cudnn7-devel-ubuntu16.04
     volumes:
       - name: docker
         path: /var/run/docker.sock
