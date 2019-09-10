@@ -119,8 +119,8 @@ steps:
       - "echo \"Building and tagging branch: $BRANCH\""
       - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
           ${IMAGE_REGISTRY}"
-      - "doc -f girder/dc.yml build"
-      - "doc -f girder/dc.yml push "
+      - "docker-compose -f girder/dc.yml build"
+      - "docker-compose -f girder/dc.yml push "
     environment:
       GITLAB_PASSWORD:
         from_secret: kwcvbot_password
