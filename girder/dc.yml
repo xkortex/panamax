@@ -2,7 +2,7 @@
 
 version: '3.7'
 services:
-  itk:
+  girder_worker:
     build:
       context: .
       dockerfile: girder_worker.docker
@@ -10,6 +10,6 @@ services:
         IMAGE_REGISTRY: ${IMAGE_REGISTRY}
         OS_BASE: ${OS_BASE}
         OS_VERS: ${OS_VERS}
-    image: "xkortex/girder_worker-${OS_BASE}-${OS_VERS}:latest"
+    image: "${IMAGE_REGISTRY}/girder_worker-${OS_BASE}-${OS_VERS}:latest"
 
 ...
