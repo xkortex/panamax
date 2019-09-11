@@ -134,6 +134,30 @@ steps:
       - name: ssh
         path: /root/.ssh
   # =======================================================================
+
+  - name: "BTP viame_girder_worker_cuda"
+    image: kitware/dind
+    commands:
+      - "export BRANCH=$(echo ${\
+         DRONE_SOURCE_BRANCH} | tr / - | sed 's/master/latest/g')"
+      - "echo \"Building and tagging branch: $BRANCH\""
+      - "docker login -u kwcvrobot -p $GITLAB_PASSWORD \
+          ${IMAGE_REGISTRY}"
+      - "docker-compose -f viame/dc.yml build viame_girder_worker"
+      - "docker-compose -f viame/dc.yml push  viame_girder_worker"
+    environment:
+      GITLAB_PASSWORD:
+        from_secret: kwcvbot_password
+      IMAGE_REGISTRY:
+        from_secret: gitlab_registry
+      OS_BASE: cuda
+      OS_VERS: 9.1-cudnn7-devel-ubuntu16.04
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+      - name: ssh
+        path: /root/.ssh
+  # =======================================================================
 volumes:
   - name: docker
     host:
