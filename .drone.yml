@@ -171,6 +171,7 @@ trigger:
   - stage
   - latest
   - master
+  - rapid
   event:
   - push
   - pull_request
