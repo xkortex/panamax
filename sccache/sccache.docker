@@ -1,0 +1,21 @@
+ARG OS_VERS=stretch
+FROM rust:${OS_VERS} as compile
+
+WORKDIR /root
+
+#RUN apk --no-cache add --update curl
+
+RUN curl -L https://github.com/mozilla/sccache/archive/0.2.11.tar.gz \
+        -o sccache.tar.gz
+
+
+RUN tar xf sccache.tar.gz
+
+RUN cd sccache-0.2.11 &&\
+    cargo build --features=all --release
+
+
+##
+FROM busybox
+
+COPY --from=compile /root/sccache-0.2.11/target/release/sccache  /

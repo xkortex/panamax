@@ -1,0 +1,13 @@
+---
+version: '3.7'
+services:
+  redis-sccache:
+    container_name: redis-sccache
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - /data/redis:/data
+    entrypoint: redis-server --appendonly yes
+    restart: unless-stopped
+...

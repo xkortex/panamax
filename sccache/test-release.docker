@@ -1,0 +1,22 @@
+ARG IMAGE_REGISTRY=xkortex
+ARG OS_BASE=ubuntu
+ARG OS_VERS=xenial
+FROM ${IMAGE_REGISTRY}/${OS_BASE}:${OS_VERS} as base
+
+RUN apt-get update -qq && apt-get install -yq \
+        curl \
+        wget \
+        apt-transport-https \
+        ca-certificates \
+        software-properties-common \
+        && rm -rf /var/lib/apt/lists/*
+
+#        libssl-dev \
+
+WORKDIR /root
+
+RUN wget --no-check-certificate -qO- https://github.com/mozilla/sccache/releases/download/0.2.8/sccache-0.2.8-x86_64-unknown-linux-musl.tar.gz | tar xvz \
+  && mv sccache-0.2.8-x86_64-unknown-linux-musl/sccache .
+
+
+RUN ./sccache
