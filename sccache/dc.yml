@@ -1,0 +1,15 @@
+---
+
+version: '3.7'
+services:
+  sccache:
+    build:
+      context: .
+      dockerfile: sccache.docker
+    image: "${IMAGE_REGISTRY}/sccache:stretch"
+    environment:
+      RUST_LOG: debug
+      OS_VERS: stretch
+    ports:
+      - 4226:4226
+...

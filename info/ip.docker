@@ -1,0 +1,24 @@
+FROM ubuntu:bionic
+
+WORKDIR /root
+
+## Every node gets some net debug tools for now. Eventually this could be
+## streamlined
+## iproute2 gets us `ip`
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    sudo \
+    nano \
+    dnsutils \
+    iputils-ping \
+    iproute2 \
+    net-tools \
+    inetutils-traceroute \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'update to invalidate cache [2]' &&\
+    ip addr &&\
+    export IPS=$(ip -br a  | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1') &&\
+    echo ${IPS} &&\
+    traceroute google.com
