@@ -1,0 +1,3 @@
+#!/bin/bash
+## Wrap our compiler with sccache to allow setting CC=/path/to/sccache.d/g++
+exec sccache /usr/bin/gcc "$@"
