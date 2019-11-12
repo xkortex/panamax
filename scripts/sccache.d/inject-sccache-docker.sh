@@ -71,6 +71,6 @@ exec sccache /usr/bin/g++ "$@"
 chmod +x "$SCC_DIR/gcc"
 chmod +x "$SCC_DIR/g++"
 
-export CC="$SCC_DIR/gcc"
-export CXX="$SCC_DIR/g++"
+export SCCACHE_CC="$SCC_DIR/gcc"
+export SCCACHE_CXX="$SCC_DIR/g++"
 
