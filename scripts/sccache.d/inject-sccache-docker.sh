@@ -34,12 +34,17 @@ if [[ -z "$_SCCACHE_HOST" ]] || [[ -z "$_SCCACHE_PORT" ]]; then
 fi
 
 ## download and enable sccache
-wget --no-check-certificate -qO- \
-    "https://github.com/mozilla/sccache/releases/download/0.2.8/sccache-0.2.8-${ARCH}-unknown-${OSNAME}-musl.tar.gz" \
-        | tar xvz \
-    && mv "sccache-0.2.8-${ARCH}-unknown-${OSNAME}-musl/sccache" /usr/local/bin/sccache \
-    && rm -r "sccache-0.2.8-${ARCH}-unknown-${OSNAME}-musl/" \
-    && chmod +x /usr/local/bin/sccache
+if [[ -f /usr/local/bin/sccache ]]; then
+    echo "<> <> sccache already exists <> <>"
+else
+    wget --no-check-certificate -qO- \
+        "https://github.com/mozilla/sccache/releases/download/0.2.8/sccache-0.2.8-${ARCH}-unknown-${OSNAME}-musl.tar.gz" \
+            | tar xvz \
+        && mv "sccache-0.2.8-${ARCH}-unknown-${OSNAME}-musl/sccache" /usr/local/bin/sccache \
+        && rm -r "sccache-0.2.8-${ARCH}-unknown-${OSNAME}-musl/" \
+        && chmod +x /usr/local/bin/sccache
+fi
+
 
 ## Check if server is reachable
 sccache -s
