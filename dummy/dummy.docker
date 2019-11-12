@@ -36,3 +36,11 @@ RUN ls &&\
 #    export http_proxy="http://apt_cache:3142/" &&\
     apt-get update && apt-get install -y \
         python-dev
+
+ADD https://github.com/xkortex/xac/releases/download/v0.0.1/kv-linux-amd64 /usr/local/bin/kv
+
+RUN chmod +x /usr/local/bin/kv
+
+RUN kv foo=bar
+
+RUN kv foo
