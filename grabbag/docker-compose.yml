@@ -1,0 +1,17 @@
+---
+# COMPUTER VISION GRAB BAG. EVERYTHING PLUS THE KITCHEN SINK.
+version: '3.7'
+services:
+  vision:
+    build:
+      context: .
+      dockerfile: noconda.docker
+      args:
+        IMAGE_REGISTRY: ${IMAGE_REGISTRY}
+    image: "${IMAGE_REGISTRY}/grabbag:latest"
+    stdin_open: true
+    tty: true
+    volumes:
+    - "$HOME:$HOME:ro"
+    - "/dock/vision:/dock/vision"
+...

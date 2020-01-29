@@ -8,13 +8,18 @@ ARG VERS_ITK=master
 ENV VERS_ITK=$VERS_ITK\
     PROJ_VERS=$VERS_ITK\
     PROJ_NAME=itk \
-    SRC_BASE=/root \
+    SRC_BASE=/src \
     PY_MAJOR_VERSION=2
 
-WORKDIR /root/
+WORKDIR /src/
 
-RUN git clone --depth 1 https://github.com/InsightSoftwareConsortium/ITK.git itk &&\
-    export PROJ_VERS=$(git describe --tags --dirty)
+RUN mkdir -p /src /build /release &&\
+    git clone https://github.com/InsightSoftwareConsortium/ITK.git itk &&\
+    cd itk &&\
+    export PROJ_VERS=$(git describe --tags --dirty --always) &&\
+    echo "$PROJ_VERS" &&\
+    echo "$PROJ_VERS" > /release/itk_version.txt
+
 
 
 RUN mkdir -p /build/${PROJ_NAME} &&\
@@ -25,6 +30,8 @@ RUN mkdir -p /build/${PROJ_NAME} &&\
         -DCMAKE_INSTALL_PREFIX=/dest/${PROJ_NAME} \
         -DCMAKE_BUILD_TYPE=Release \
         -DPYTHON_EXECUTABLE=/usr/bin/python${PY_MAJOR_VERSION} \
+        -DModule_PhaseSymmetry:BOOL=ON \
+        -DModule_AnisotropicDiffusionLBR:BOOL=ON \
         -G Ninja \
         | tee /dest/${PROJ_NAME}/${PROJ_NAME}-${PROJ_VERS}_cmake.log
 

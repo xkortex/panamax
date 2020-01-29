@@ -1,0 +1,136 @@
+## ~#~ Caffe based on Python3 ~#~
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 as base_cudnn
+
+ENV CUDA_VERSION 10.0
+ENV CUDNN_VERSION 7
+
+WORKDIR /root
+
+# Bare-bones boilerplate system deps
+RUN    apt-get update -qq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        curl \
+        tzdata \
+        software-properties-common \
+    && apt-get install -y --no-install-recommends \
+        apt-transport-https \
+        ca-certificates \
+        cmake \
+        git \
+        pkg-config \
+        openssl \
+        unzip \
+        wget \
+        zsh \
+        nano \
+        vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Compilation / CV deps
+# repo is for libjasper
+RUN     add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"  \
+    &&  apt-get update -qq \
+    &&  apt-get install -y --no-install-recommends \
+            software-properties-common \
+            build-essential \
+            gfortran \
+            libatlas-base-dev \
+            libboost-all-dev \
+            libgflags-dev \
+            libgoogle-glog-dev \
+            libhdf5-serial-dev \
+            libjasper-dev \
+            libleveldb-dev \
+            liblmdb-dev \
+            libopencv-dev \
+            libprotobuf-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            libsnappy-dev \
+            protobuf-compiler \
+            python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# === === === === === === === === === === === === === === === === === ===
+FROM base_cudnn as base_py
+# numpy 15 is necessary for certain compatibilities. you can upgrade it later
+RUN    curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3
+
+# Caffe dependencies
+RUN pip3 install --no-cache-dir \
+        setuptools \
+        Cython>=0.19.2 \
+        scipy>=0.13.2 \
+        scikit-image>=0.9.3 \
+        decorator \
+        easydict \
+        h5py \
+        kiwisolver \
+        leveldb>=0.191 \
+        matplotlib>=1.3.1 \
+        networkx>=1.8.1 \
+        pandas>=0.12.0 \
+        Pillow>=2.3.0 \
+        protobuf>=2.5.0 \
+        pydot \
+        pyparsing==2.2.0 \
+        python-dateutil \
+        python-gflags>=2.0 \
+        pyyaml>=3.10 \
+        six>=1.1.0 \
+        subprocess32 \
+        toolz
+
+## === === === === === === === Caffe === === === === === ===
+FROM base_py as caffe_python
+
+# Get the latest cmake - fixes bug involving this issue:
+# CMake Error: CUDA_cublas_device_LIBRARY (ADVANCED) set to NOTFOUND
+RUN curl https://apt.kitware.com/keys/kitware-archive-latest.asc -L 2>/dev/null | apt-key add - \
+    && apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" \
+    && apt-get update -y \
+    && apt-get install -y \
+        cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+## Download, configure, and install Caffe.
+ENV CAFFE_ROOT=/opt/caffe \
+    CAFFE_GITSHA=04ab089
+WORKDIR $CAFFE_ROOT
+
+RUN nvidia-smi || echo "No nvidia-smi detected. docker runtime may be incorrect"
+
+# SKIP the python dependency install step. Do that above. I need finer-grained
+# control over pip
+RUN     git clone https://github.com/BVLC/caffe.git . \
+    &&  git checkout ${CAFFE_GITSHA} \
+    &&  cd python \
+    &&  cd .. \
+    &&  git clone https://github.com/NVIDIA/nccl.git \
+    &&  cd nccl \
+    &&  make -j "$((`nproc` - 1))" install \
+    &&  cd .. \
+    &&  rm -rf nccl \
+    &&  mkdir build && cd build \
+    &&  cmake \
+            -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
+            -D USE_CUDNN=1 \
+            -D USE_NCCL=1 \
+            -D python_version=3 \
+            -DCUDA_ARCH_NAME:STRING=Manual \
+            -DCUDA_ARCH_BIN:STRING="50 52 53 60 61 62 70" \
+            -DCUDA_ARCH_PTX:STRING=""
+            .. \
+    &&  make -j "$((`nproc` - 1))"
+
+ENV PYCAFFE_ROOT $CAFFE_ROOT/python
+ENV PYTHONPATH $PYCAFFE_ROOT:$PYTHONPATH
+ENV PATH $CAFFE_ROOT/build/tools:$PYCAFFE_ROOT:$PATH
+RUN echo "$CAFFE_ROOT/build/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
+
+WORKDIR /root
+
+## ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ end ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~
+

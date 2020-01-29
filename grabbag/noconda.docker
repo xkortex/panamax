@@ -1,0 +1,82 @@
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 as base_cudnn
+
+# setup environment
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+
+# Bare-bones boilerplate system deps along with some technical libs
+# tzdata must be installed with noninteractive in order to prevent interactive prompt
+RUN    apt-get update -qq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        curl \
+        wget \
+        apt-transport-https \
+        software-properties-common \
+        ca-certificates \
+        git \
+        openssl \
+        tzdata \
+    && rm -rf /var/lib/apt/lists/* # this is a docker idiom, it helps keep image sizes down
+
+# Get the latest cmake
+RUN curl https://apt.kitware.com/keys/kitware-archive-latest.asc -L 2>/dev/null | apt-key add - \
+    && apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" \
+    && apt-get update -y \
+    && apt-get install -y \
+        cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+# Compilation / CV deps
+RUN     add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
+    &&  apt-get update -qq \
+    &&  apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            gfortran \
+            libatlas-base-dev \
+            libboost-all-dev \
+            libgflags-dev \
+            libgoogle-glog-dev \
+            libhdf5-serial-dev \
+            libleveldb-dev \
+            liblmdb-dev \
+            libopencv-dev \
+            libprotobuf-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            libsnappy-dev \
+            libopenblas-base \
+            libomp-dev \
+            protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+
+# creature comforts
+RUN      apt-get update -qq \
+    &&  apt-get install -y --no-install-recommends \
+        zsh \
+        wget \
+        unzip \
+        sudo \
+        nano \
+        vim \
+        iputils-ping \
+        iproute2 \
+        net-tools \
+        dnsutils \
+        inetutils-traceroute \
+        jq \
+        lsb-release \
+        zlib1g-dev \
+        cmake-curses-gui \
+        mc \
+        tmux \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# === === === === === === === === === === === === === ===
+FROM base_cudnn as conda
+
+WORKDIR /src

@@ -23,6 +23,8 @@ services:
         OS_VERS: ${OS_VERS}
         VERS_ITK: latest
         SUBTAG: cvfull
+    tty: true
+    command: sh
     volumes:
       - "workspace:/ws"
     image: "${IMAGE_REGISTRY}/itk-${OS_VERS}:latest"
