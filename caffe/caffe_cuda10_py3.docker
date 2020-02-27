@@ -120,7 +120,7 @@ RUN     git clone https://github.com/BVLC/caffe.git . \
             -D USE_NCCL=1 \
             -D python_version=3 \
             -DCUDA_ARCH_NAME:STRING=Manual \
-            -DCUDA_ARCH_BIN:STRING="50 52 53 60 61 62 70" \
+            -DCUDA_ARCH_BIN:STRING="50 52 53 60 61 62 70 75" \
             -DCUDA_ARCH_PTX:STRING=""
             .. \
     &&  make -j "$((`nproc` - 1))"

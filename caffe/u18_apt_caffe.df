@@ -1,6 +1,6 @@
 ARG SOURCE_IMAGE_REGISTRY=nvidia
 ARG SOURCE_IMAGE_NAME=cuda
-ARG SOURCE_IMAGE_TAG=10.0-cudnn7-devel-ubuntu16.04
+ARG SOURCE_IMAGE_TAG=10.0-cudnn7-devel-ubuntu18.04
 FROM ${SOURCE_IMAGE_REGISTRY}/${SOURCE_IMAGE_NAME}:${SOURCE_IMAGE_TAG} as base
 ARG SOURCE_IMAGE_REGISTRY
 ARG SOURCE_IMAGE_NAME
@@ -8,7 +8,6 @@ ARG SOURCE_IMAGE_TAG
 ENV SOURCE_IMAGE_REGISTRY=${SOURCE_IMAGE_REGISTRY} \
     SOURCE_IMAGE_NAME=${SOURCE_IMAGE_NAME} \
     SOURCE_IMAGE_TAG=${SOURCE_IMAGE_TAG}
-
 
 # setup environment
 ENV LANG=C.UTF-8 \
@@ -29,17 +28,8 @@ RUN    apt-get update -qq \
         tzdata \
     && rm -rf /var/lib/apt/lists/* # this is a docker idiom, it helps keep image sizes down
 
-# Get the latest cmake
-RUN curl https://apt.kitware.com/keys/kitware-archive-latest.asc -L 2>/dev/null | apt-key add - \
-    && apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" \
-    && apt-get update -y \
-    && apt-get install -y \
-        cmake \
-    && rm -rf /var/lib/apt/lists/*
-
 # Compilation / CV deps
-RUN     add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
-    &&  apt-get update -qq \
+RUN     apt-get update -qq \
     &&  apt-get install -y --no-install-recommends \
             build-essential \
             cmake \
@@ -52,7 +42,6 @@ RUN     add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-securit
             libhdf5-serial-dev \
             libleveldb-dev \
             liblmdb-dev \
-            libopencv-dev \
             libprotobuf-dev \
             libjpeg-dev \
             libpng-dev \
@@ -61,47 +50,12 @@ RUN     add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-securit
             libopenblas-base \
             libomp-dev \
             protobuf-compiler \
+            python-dev \
+            python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# creature comforts
-RUN      apt-get update -qq \
+RUN     apt-get update -qq \
     &&  apt-get install -y --no-install-recommends \
-        zsh \
-        wget \
-        unzip \
-        sudo \
-        nano \
-        vim \
-        iputils-ping \
-        iproute2 \
-        net-tools \
-        dnsutils \
-        inetutils-traceroute \
-        jq \
-        lsb-release \
-        zlib1g-dev \
-        cmake-curses-gui \
-        mc \
-        tmux \
+            libopencv-dev \
+            caffe-cuda \
     && rm -rf /var/lib/apt/lists/*
-
-
-RUN      apt-get update -qq \
-    &&  apt-get install -y --no-install-recommends \
-        python-dev \
-        python3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN    curl https://bootstrap.pypa.io/get-pip.py -o /root/get-pip.py \
-    && python2 /root/get-pip.py \
-    && python3 /root/get-pip.py
-
-
-RUN    pip2 install --no-cache-dir \
-            numpy \
-            scipy \
-    && pip3 install --no-cache-dir \
-            numpy \
-            scipy
-
-

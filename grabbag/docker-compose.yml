@@ -7,8 +7,11 @@ services:
       context: .
       dockerfile: noconda.docker
       args:
-        IMAGE_REGISTRY: ${IMAGE_REGISTRY}
-    image: "${IMAGE_REGISTRY}/grabbag:latest"
+        IMAGE_REGISTRY: ${IMAGE_REGISTRY:-nvidia}
+        SOURCE_IMAGE_REGISTRY: ${SOURCE_IMAGE_REGISTRY:-nvidia}
+        SOURCE_IMAGE_NAME: ${SOURCE_IMAGE_NAME:-cuda}
+        SOURCE_IMAGE_TAG: ${SOURCE_IMAGE_TAG:-10.0-cudnn7-devel-ubuntu16.04}
+    image: "${IMAGE_REGISTRY:-xkortex}/grabbag:latest"
     stdin_open: true
     tty: true
     volumes:
