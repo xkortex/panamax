@@ -1,0 +1,21 @@
+FROM ubuntu:bionic
+
+RUN apt-get update -qq && apt-get install -yq \
+        curl \
+        apt-transport-https \
+        ca-certificates \
+        software-properties-common \
+    && apt-get install -qq --no-install-recommends \
+        git \
+        nano \
+        vim \
+        iputils-ping \
+        iputils-tracepath \
+        iproute2 \
+        dnsutils \
+    && rm -rf /var/lib/apt/lists/*
+
+
+COPY watshell.sh /bin/watshell
+
+ENTRYPOINT ["/bin/bash", "-c"]

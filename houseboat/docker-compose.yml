@@ -1,0 +1,12 @@
+---
+
+version: '3.7'
+services:
+  ## Essential packages for building
+  houseboat18:
+    build:
+      context: .
+      dockerfile: ./build-essential.docker
+    image: "${IMAGE_REGISTRY:-xkortex}/${IMAGE_NAME:-houseboat18}:${TAG:-latest}"
+
+...
