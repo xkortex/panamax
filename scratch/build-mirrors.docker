@@ -11,9 +11,12 @@ ARG OS_VERS
 ENV OS_VERS=$OS_VERS
 
 ###  ===   ===   Configure Mirrors and Timezone Data ===  === ###
-###  Install and configure tzdata so we don't get prompted for it later
+###  Set apt to use fastest mirrors. Install and configure tzdata so we don't get prompted for it later
 ###  This can happen if a later layer apt install requires tzdata and isn't set noninteractive
 RUN     export DEBIAN_FRONTEND=noninteractive \
+    &&  echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${OS_VERS} main restricted universe multiverse" > /etc/apt/sources.list \
+    &&  echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${OS_VERS}-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+    &&  echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${OS_VERS}-security main restricted universe multiverse" >> /etc/apt/sources.list \
     &&  echo 'Etc/UTC' > /etc/timezone \
     &&  ln -sf /usr/share/zoneinfo/${ZONEINFO} /etc/localtime \
     &&  apt-get update -q && apt-get install -q -y tzdata ca-certificates \
@@ -30,7 +33,6 @@ RUN     apt-get update -qq && apt-get install -qq \
             gpg-agent \
     && rm -rf /var/lib/apt/lists/*
 
-## Splitting apt takes marginally longer, but makes each layer smaller
 RUN     apt-get update -qq && apt-get install -qq --no-install-recommends \
             software-properties-common \
             build-essential \
@@ -41,10 +43,3 @@ RUN     apt-get update -qq && apt-get install -qq --no-install-recommends \
             ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
-
-RUN curl https://apt.kitware.com/keys/kitware-archive-latest.asc -L 2>/dev/null | apt-key add - \
-    && apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${OS_VERS} main" \
-    && apt-get update -y \
-    && apt-get install -y \
-        cmake \
-    && rm -rf /var/lib/apt/lists/*

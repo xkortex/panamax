@@ -1,4 +1,7 @@
-FROM ubuntu:bionic
+ARG TARGET_REGISTRY
+ARG OS_BASE=ubuntu
+ARG OS_VERS=focal
+FROM ${TARGET_REGISTRY}${OS_BASE}:${OS_VERS} as base
 
 RUN apt-get update -qq && apt-get install -yq \
         curl \
@@ -16,6 +19,6 @@ RUN apt-get update -qq && apt-get install -yq \
     && rm -rf /var/lib/apt/lists/*
 
 
-COPY watshell.sh /bin/watshell
+COPY ../watshell.sh /bin/watshell
 
 ENTRYPOINT ["/bin/bash", "-c"]

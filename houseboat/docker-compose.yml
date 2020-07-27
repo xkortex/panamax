@@ -4,9 +4,28 @@ version: '3.7'
 services:
   ## Essential packages for building
   houseboat18:
+    image: "${IMAGE_REGISTRY:-xkortex}/${IMAGE_NAME:-houseboat18}:${TAG:-latest}"
+    container_name: houseboat18
     build:
+      args:
+        HOST_USERID: "${HOST_USERID:-1000}"
+        HOST_USERNAME: "${HOST_USERNAME:-$USER}"
       context: .
       dockerfile: ./build-essential.docker
-    image: "${IMAGE_REGISTRY:-xkortex}/${IMAGE_NAME:-houseboat18}:${TAG:-latest}"
+    hostname: houseboat18
+    tty: true
+    stdin_open: true
+    volumes:
+      - "homedir:/home/${HOST_USERNAME:-$USER}"   # user settings persistence
+      - "etc:/etc"   # user password persistence
+      - "opt:/opt"   # user install
+#      - "/dock/houseboat18:/dock/houseboat18"     # passthrough
+      - "$HOME:/host/$HOME:ro"                    # access to user home
+      - "/mnt:/mnt:ro"                            # access to mount points
 
+
+volumes:
+  homedir:
+  etc:
+  opt:
 ...
