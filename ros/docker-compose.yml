@@ -1,0 +1,30 @@
+---
+
+version: '3.7'
+services:
+  melodic:
+    image: "${IMAGE_REGISTRY:-xkortex}/${IMAGE_NAME:-ros}:${TAG:-melodic}"
+    container_name: melodic
+    build:
+      args:
+        HOST_USERID: "${HOST_USERID:-1000}"
+        HOST_USERNAME: "${HOST_USERNAME:-$USER}"
+      context: .
+      dockerfile: ./melodic-extras.df
+    network_mode: host
+    tty: true
+    stdin_open: true
+    volumes:
+      - "homedir:/home/${HOST_USERNAME:-$USER}"   # user settings persistence
+      - "etc:/etc"   # user password persistence
+      - "opt:/opt"   # user install
+      - "/dock/melodic:/dock/melodic"     # passthrough
+      - "$HOME:/host/$HOME:ro"                    # access to user home
+      - "/mnt:/mnt:ro"                            # access to mount points
+
+
+volumes:
+  homedir:
+  etc:
+  opt:
+...

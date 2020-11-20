@@ -13,10 +13,22 @@ ENV OS_VERS=$OS_VERS
 ###  ===   ===   Configure Mirrors and Timezone Data ===  === ###
 ###  Set apt to use fastest mirrors. Install and configure tzdata so we don't get prompted for it later
 ###  This can happen if a later layer apt install requires tzdata and isn't set noninteractive
+###  Mirrors can be slow, which kind of defeats the purpose. here's non-mirrored:
+#export DEBIAN_FRONTEND=noninteractive \
+#    &&  echo "deb http://archive.ubuntu.com/ubuntu ${OS_VERS} main restricted universe multiverse" > /etc/apt/sources.list \
+#    &&  echo "deb http://archive.ubuntu.com/ubuntu ${OS_VERS}-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+#    &&  echo "deb http://archive.ubuntu.com/ubuntu ${OS_VERS}-security main restricted universe multiverse" >> /etc/apt/sources.list \
+#    &&  echo 'Etc/UTC' > /etc/timezone \
+#    &&  ln -sf /usr/share/zoneinfo/${ZONEINFO} /etc/localtime \
+#    &&  apt-get update -q && apt-get install -q -y tzdata ca-certificates \
+#    &&  update-ca-certificates \
+#    &&  rm -rf /var/lib/apt/lists/* \
+#    &&  dpkg-reconfigure --frontend noninteractive tzdata
+
 RUN     export DEBIAN_FRONTEND=noninteractive \
-    &&  echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${OS_VERS} main restricted universe multiverse" > /etc/apt/sources.list \
-    &&  echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${OS_VERS}-updates main restricted universe multiverse" >> /etc/apt/sources.list \
-    &&  echo "deb mirror://mirrors.ubuntu.com/mirrors.txt ${OS_VERS}-security main restricted universe multiverse" >> /etc/apt/sources.list \
+    &&  echo "deb http://archive.ubuntu.com/ubuntu ${OS_VERS} main restricted universe multiverse" > /etc/apt/sources.list \
+    &&  echo "deb http://archive.ubuntu.com/ubuntu ${OS_VERS}-updates main restricted universe multiverse" >> /etc/apt/sources.list \
+    &&  echo "deb http://archive.ubuntu.com/ubuntu ${OS_VERS}-security main restricted universe multiverse" >> /etc/apt/sources.list \
     &&  echo 'Etc/UTC' > /etc/timezone \
     &&  ln -sf /usr/share/zoneinfo/${ZONEINFO} /etc/localtime \
     &&  apt-get update -q && apt-get install -q -y tzdata ca-certificates \

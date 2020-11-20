@@ -6,13 +6,13 @@ ARG OS_BASE=ubuntu
 ARG OS_VERS=focal
 FROM ${BASE_REGISTRY}${OS_BASE}:${OS_VERS} as base
 
-ARG ZONEINFO=America/New_York
 ARG OS_VERS
 ENV OS_VERS=$OS_VERS
 
-###  ===   ===   Configure Mirrors and Timezone Data ===  === ###
+###  ===   ===   Configure Timezone Data ===  === ###
 ###  Install and configure tzdata so we don't get prompted for it later
 ###  This can happen if a later layer apt install requires tzdata and isn't set noninteractive
+ARG ZONEINFO=America/New_York
 RUN     export DEBIAN_FRONTEND=noninteractive \
     &&  echo 'Etc/UTC' > /etc/timezone \
     &&  ln -sf /usr/share/zoneinfo/${ZONEINFO} /etc/localtime \
