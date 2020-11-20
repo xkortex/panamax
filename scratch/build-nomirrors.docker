@@ -6,13 +6,13 @@ ARG OS_BASE=ubuntu
 ARG OS_VERS=focal
 FROM ${BASE_REGISTRY}${OS_BASE}:${OS_VERS} as base
 
-ARG ZONEINFO=America/New_York
 ARG OS_VERS
 ENV OS_VERS=$OS_VERS
 
-###  ===   ===   Configure Mirrors and Timezone Data ===  === ###
+###  ===   ===   Configure Timezone Data ===  === ###
 ###  Install and configure tzdata so we don't get prompted for it later
 ###  This can happen if a later layer apt install requires tzdata and isn't set noninteractive
+ARG ZONEINFO=America/New_York
 RUN     export DEBIAN_FRONTEND=noninteractive \
     &&  echo 'Etc/UTC' > /etc/timezone \
     &&  ln -sf /usr/share/zoneinfo/${ZONEINFO} /etc/localtime \
@@ -30,7 +30,6 @@ RUN     apt-get update -qq && apt-get install -qq \
             gpg-agent \
     && rm -rf /var/lib/apt/lists/*
 
-## Splitting apt takes marginally longer, but makes each layer smaller
 RUN     apt-get update -qq && apt-get install -qq --no-install-recommends \
             software-properties-common \
             build-essential \
@@ -39,12 +38,4 @@ RUN     apt-get update -qq && apt-get install -qq --no-install-recommends \
             ssh \
             unzip \
             ninja-build \
-    && rm -rf /var/lib/apt/lists/*
-
-
-RUN curl https://apt.kitware.com/keys/kitware-archive-latest.asc -L 2>/dev/null | apt-key add - \
-    && apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${OS_VERS} main" \
-    && apt-get update -y \
-    && apt-get install -y \
-        cmake \
     && rm -rf /var/lib/apt/lists/*

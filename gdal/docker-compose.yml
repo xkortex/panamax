@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  gdal-service:
+    container_name: gdal-service
+    image: "${IMAGE_REGISTRY:-xkortex}/gdal-service:${TAG:-latest}"
+    build:
+      context: .
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-osgeo/gdal:ubuntu-small-latest}
+    volumes:
+    # add some mount point(su here to communicate with host or other containers
+      - "/mnt:/mnt:ro"
+      - "$PWD:/pwd:ro"

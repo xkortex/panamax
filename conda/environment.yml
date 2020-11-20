@@ -1,0 +1,7 @@
+name: foo
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - pip
+

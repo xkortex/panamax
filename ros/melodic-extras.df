@@ -1,0 +1,52 @@
+FROM ros:melodic-ros-base
+
+RUN apt-get update && apt-get install -y \
+        python-catkin-tools \
+        python3-dev \
+        curl \
+        sudo \
+        nano \
+        iputils-ping \
+        iproute2 \
+        net-tools \
+        dnsutils \
+        inetutils-traceroute \
+        jq \
+        sqlite3 \
+        tmux \
+        vim \
+        zsh \
+    && rm -rf /var/lib/apt/lists/* &&\
+    rosdep update &&\
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py &&\
+    python3 get-pip.py &&\
+    python get-pip.py
+
+
+
+RUN     mkdir -p /src \
+    &&  useradd --uid=777 share \
+    &&  chmod -R 775 /src \
+    &&  chown -R share:share /src
+
+
+ARG HOST_USERID=1000
+ARG HOST_USERNAME=mike
+ENV HOST_USERNAME=${HOST_USERNAME} \
+    USER=${HOST_USERNAME}
+COPY ./entry.sh /
+
+RUN     useradd -m  --uid=${HOST_USERID} ${HOST_USERNAME}
+RUN     echo "password_unset" > "/home/${HOST_USERNAME}/.letmein"
+RUN     echo "${HOST_USERNAME}:letmein" | chpasswd
+RUN     usermod -aG sudo ${HOST_USERNAME} \
+    &&  usermod -aG share ${HOST_USERNAME} \
+    &&  chmod +x /entry.sh
+
+USER ${HOST_USERNAME}
+
+ENV XDG_CONFIG_HOME=/home/$USER/.config \
+    XDG_DATA_HOME=/home/$USER/.local/share
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/xkortex/bashbox/master/uber-setup-user.sh)"
+
+ENTRYPOINT ["/entry.sh"]

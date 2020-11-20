@@ -1,0 +1,38 @@
+---
+
+version: '3.7'
+services:
+  ## Essential packages for building
+  buildees:
+    build:
+      context: .
+      dockerfile: general/build-essential.docker
+      args:
+        BASE_REGISTRY: ${BASE_REGISTRY}
+        OS_BASE: ${OS_BASE:-ubuntu}
+        OS_VERS: ${OS_VERS:-focal}
+    image: "${TARGET_REGISTRY}${OS_BASE:-ubuntu}-buildees:${OS_VERS:-focal}"
+  pysci:
+    build:
+      context: .
+      dockerfile: general/pysci.docker
+      args:
+        TARGET_REGISTRY: ${TARGET_REGISTRY}
+        OS_BASE: ${OS_BASE:-ubuntu}
+        OS_VERS: ${OS_VERS:-focal}
+    image: "${TARGET_REGISTRY}${OS_BASE}:${OS_VERS}-pysci"
+  cvfull:
+    build:
+      context: .
+      dockerfile: general/cvfull.docker
+      args:
+        TARGET_REGISTRY: ${TARGET_REGISTRY}
+        OS_BASE: ${OS_BASE:-ubuntu}
+        OS_VERS: ${OS_VERS:-focal}
+    image: "${TARGET_REGISTRY}${OS_BASE}:${OS_VERS}-cvfull"
+  toolbox:
+    build:
+      context: .
+      dockerfile: general/toolbox.df
+    image: "${TARGET_REGISTRY}toolbox:latest"
+...

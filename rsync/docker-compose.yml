@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  rsync_server:
+    container_name: rsync_server
+    build:
+      context: .
+    image: xkortex/rsync_server
+    ports:
+      - "2233:22"
+    volumes:
+      - /data:/data:ro
+    restart: unless-stopped
