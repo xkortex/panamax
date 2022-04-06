@@ -1,0 +1,85 @@
+# Ubuntu base for building things with gcc, cmake and the like
+
+FROM ubuntu:bionic
+
+RUN     apt-get update -qq \
+    &&  apt-get install -qq \
+            curl \
+            apt-transport-https \
+            ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN     apt-get update -qq \
+    &&  apt-get install -y --no-install-recommends \
+            arp-scan \
+            build-essential \
+            git \
+            iproute2 \
+            iputils-ping \
+            dnsutils \
+            make \
+            ninja-build \
+            pkg-config \
+            software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN     apt-get update -qq \
+    &&  apt-get install -y --no-install-recommends \
+            lsb-release \
+            python3-dev \
+            python3-setuptools \
+            sqlite3 \
+            ssh \
+            sudo \
+            tmux \
+            unzip \
+            wget \
+            zsh \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN     wget https://golang.org/dl/go1.14.5.linux-amd64.tar.gz -O /tmp/go.tar.gz \
+    &&  tar -xzf /tmp/go.tar.gz -C /usr/local/ \
+    &&  rm -rf /tmp/go.tar.gz
+
+ENV RUSTUP_HOME=/opt/rust \
+    CARGO_HOME=/opt/rust \
+    PATH=/opt/rust/bin:$PATH
+RUN     curl -sSfL sh.rustup.rs | sh -s -- -y
+RUN     echo $CARGO_HOME \
+    &&  cargo install  exa zoxide b3sum shishua_rs rm-improved ripgrep
+
+RUN exa /
+
+RUN curl --silent --show-error \
+    https://bootstrap.pypa.io/get-pip.py | python3
+
+RUN mkdir -p /src \
+    &&  git clone https://github.com/xkortex/bashbox.git /src/bashbox
+
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/xkortex/bashbox/master/uber-setup.sh)"
+
+RUN     groupadd -g 777 share \
+    &&  useradd --uid=777 share \
+    &&  chmod -R 775 /src \
+    &&  chown -R /src
+
+
+ARG HOST_USERID=1000
+ARG HOST_USERNAME=mike
+ARG HOST_USERNAME=mike
+COPY ./entry.sh /
+
+RUN     useradd -m  --uid=${HOST_USERID} ${HOST_USERNAME}
+RUN     echo "password_unset" > "/home/${HOST_USERNAME}/.letmein"
+RUN     echo "${HOST_USERNAME}:letmein" | chpasswd
+RUN     usermod -aG sudo ${HOST_USERNAME} \
+    &&  usermod -aG share ${HOST_USERNAME} \
+    &&  chmod +x /entry.sh
+
+USER ${HOST_USERNAME}
+
+ENV XDG_CONFIG_HOME=/home/$USER/.config \
+    XDG_DATA_HOME=/home/$USER/.local/share
+#RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/xkortex/bashbox/master/uber-setup-user.sh)"
+
+ENTRYPOINT ["/entry.sh"]

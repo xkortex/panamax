@@ -1,0 +1,47 @@
+FROM debian:9
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    DEBCONF_NONINTERACTIVE_SEEN=true \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
+
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        autoconf \
+        libtool \
+        git \
+        bison \
+        flex \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 --branch jq-1.5 https://github.com/stedolan/jq.git /app
+
+# get dependencies, build, and remove anything we don't need for running jq.
+# valgrind seems to have trouble with pthreads TLS so it's off.
+
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        autoconf \
+        libtool \
+        git \
+        bison \
+        flex \
+        wget
+
+RUN  cd /app && \
+        git submodule init && \
+        git submodule update && \
+        autoreconf -i && \
+        ./configure --disable-valgrind --enable-all-static --prefix=/usr/local && \
+        make LDFLAGS=-all-static -j`nproc`
+
+RUN      make check || echo "check failed"
+
+FROM busybox
+COPY --from=0 /app/jq /bin/jq
+
+ENTRYPOINT ["/bin/jq"]
+CMD []

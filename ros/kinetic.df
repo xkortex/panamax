@@ -1,0 +1,130 @@
+# This is a clone of the ROS OSRF dockerfile for reference purposes
+
+# This is an auto generated Dockerfile for ros:ros-core
+# generated from docker_images/create_ros_core_image.Dockerfile.em
+ARG UBUNTU_DISTRO=xenial
+FROM ubuntu:$UBUNTU_DISTRO as ros-base
+
+
+# setup environment
+ARG ROS_VERSION_NUM=1.3.2
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    ROS_DISTRO=kinetic \
+    ROS_VERSION_NUM=$ROS_VERSION_NUM
+
+###  ===   ===   Configure Timezone Data and useful OS Libs ===  === ###
+###  Install and configure tzdata so we don't get prompted for it later
+###  This can happen if a later layer apt install requires tzdata and isn't set noninteractive
+ARG ZONEINFO=America/New_York
+RUN     export DEBIAN_FRONTEND=noninteractive \
+    &&  echo 'Etc/UTC' > /etc/timezone \
+    &&  ln -sf /usr/share/zoneinfo/${ZONEINFO} /etc/localtime \
+    &&  apt-get update -q && apt-get install -q -y \
+            ca-certificates \
+            curl \
+            dirmngr \
+            gnupg2 \
+            jq \
+            lsb-release \
+            tzdata \
+    &&  update-ca-certificates \
+    &&  rm -rf /var/lib/apt/lists/* \
+    &&  dpkg-reconfigure --frontend noninteractive tzdata
+###  ===   ===   ===   ===   end tzdata configuration  ===   ===   ===   ===   === ###
+
+
+# setup keys
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros1-latest.list
+
+# install bootstrap tools
+RUN apt-get update -q && apt-get install --no-install-recommends -y \
+    python-rosdep \
+    python-rosinstall \
+    python-vcstools \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# bootstrap rosdep
+RUN rosdep init \
+    && rosdep update
+
+RUN echo "ros-kinetic-ros-core=${ROS_VERSION_NUM}" &&\
+    apt-get update -q && apt-get install -y \
+    ros-kinetic-ros-core=${ROS_VERSION_NUM}* \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup entrypoint
+RUN mkdir -p /entry &&\
+    (echo '#!/bin/bash'                             &&\
+    echo 'set -e'                                       &&\
+    echo ''                                             &&\
+    echo '# setup ros environment'                      &&\
+    echo 'source "/opt/ros/kinetic/setup.bash"'     &&\
+    echo 'exec "$@"'                                \
+    ) >> /entry/generic.sh && chmod +x /entry/generic.sh &&\
+    ln -sf /entry/generic.sh /ros_entrypoint.sh
+
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["bash"]
+
+FROM ros-base as ros-tools
+
+RUN curl -sL https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64 \
+    -o /usr/local/bin/yq &&\
+    chmod +x /usr/local/bin/yq
+
+# Add Tini to handle signals
+ENV TINI_VERSION v0.18.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+
+WORKDIR /src
+
+## Every node gets some net debug tools for now. Eventually this could be
+## streamlined
+## iproute2 gets us `ip`
+
+RUN apt-get update && apt-get install -y \
+        python-catkin-tools \
+        python3-dev \
+        curl \
+        sudo \
+        nano \
+        iputils-ping \
+        iproute2 \
+        net-tools \
+        dnsutils \
+        inetutils-traceroute \
+        jq \
+        sqlite3 \
+        tmux \
+        vim \
+        zsh \
+    && rm -rf /var/lib/apt/lists/* &&\
+    rosdep update &&\
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py &&\
+    python3 get-pip.py &&\
+    python get-pip.py
+
+RUN pip install \
+        typing \
+        pathlib \
+        profilehooks \
+        vprint==0.0.2a
+
+# This is for some of my network toolkit scripts
+RUN pip3 install \
+        ping3 \
+        pyroute2
+
+# Load in convenience aliases
+COPY prereq/scripts                         /root/scripts
+RUN printf "\nsource /root/scripts/basic-aliases.sh\n" >> /root/.bashrc
+
+
+
+CMD ["bash"]
